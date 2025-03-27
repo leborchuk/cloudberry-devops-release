@@ -32,13 +32,13 @@
 # project has yet to be fully endorsed by the ASF.
 #
 # --------------------------------------------------------------------
-# Dockerfile for Cloudberry Database Base Environment
+# Dockerfile for Apache Cloudberry Base Environment
 # --------------------------------------------------------------------
 # This Dockerfile sets up a Ubuntu jammy 22.04 -based container to serve as
-# a base environment for evaluating the Cloudberry Database. It installs
+# a base environment for evaluating the Apache Cloudberry. It installs
 # necessary system utilities, configures the environment for SSH access,
-# and sets up a 'gpadmin' user with sudo privileges. The Cloudberry
-# Database DEB can be installed into this container for testing and
+# and sets up a 'gpadmin' user with sudo privileges. The Apache Cloudberry
+# DEB can be installed into this container for testing and
 # functional verification.
 #
 # Key Features:
@@ -143,25 +143,24 @@ RUN apt-get update -o Acquire::AllowInsecureRepositories=true && apt-get install
   python3-distutils \
   sudo
 
-RUN apt-get install -y locales \
-&& locale-gen "en_US.UTF-8" \
-&& update-locale LC_ALL="en_US.UTF-8"
+RUN apt-get install -y locales && \
+    locale-gen "en_US.UTF-8" && \
+    update-locale LC_ALL="en_US.UTF-8"
 
-RUN cd \
-&& XERCES_LATEST_RELEASE=3.3.0 \
-&& wget -nv "https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-${XERCES_LATEST_RELEASE}.tar.gz" \
-&& echo "$(curl -sL https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-${XERCES_LATEST_RELEASE}.tar.gz.sha256)" | sha256sum -c - \
-&& tar xf "xerces-c-${XERCES_LATEST_RELEASE}.tar.gz"; rm "xerces-c-${XERCES_LATEST_RELEASE}.tar.gz" \
-&& cd xerces-c-${XERCES_LATEST_RELEASE} \
-&& ./configure --prefix=/usr/local/xerces-c \
-&& make -j \
-&& make install -C ~/xerces-c-${XERCES_LATEST_RELEASE} \
-&& rm -rf ~/xerces-c*
+RUN cd && \
+    XERCES_LATEST_RELEASE=3.3.0 && \
+    wget -nv "https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-${XERCES_LATEST_RELEASE}.tar.gz" && \
+    echo "$(curl -sL https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-${XERCES_LATEST_RELEASE}.tar.gz.sha256)" | sha256sum -c - && \
+    tar xf "xerces-c-${XERCES_LATEST_RELEASE}.tar.gz"; rm "xerces-c-${XERCES_LATEST_RELEASE}.tar.gz" && \
+    cd xerces-c-${XERCES_LATEST_RELEASE} && \
+    ./configure --prefix=/usr/local/xerces-c && \
+    make -j$(nproc) && \
+    make install -C ~/xerces-c-${XERCES_LATEST_RELEASE} && \
+    rm -rf ~/xerces-c*
 
-RUN cd \
-&& GO_VERSION="go1.23.4" \
-&& ARCH=$(uname -m) \
-&& if [ "${ARCH}" = "aarch64" ]; then \
+RUN cd && GO_VERSION="go1.23.4" && \
+    ARCH=$(uname -m) && \
+    if [ "${ARCH}" = "aarch64" ]; then \
         GO_ARCH="arm64" && \
         GO_SHA256="16e5017863a7f6071363782b1b8042eb12c6ca4f4cd71528b2123f0a1275b13e"; \
     elif [ "${ARCH}" = "x86_64" ]; then \
@@ -169,15 +168,15 @@ RUN cd \
         GO_SHA256="6924efde5de86fe277676e929dc9917d466efa02fb934197bc2eba35d5680971"; \
     else \
         echo "Unsupported architecture: ${ARCH}" && exit 1; \
-    fi \
-&& GO_URL="https://go.dev/dl/${GO_VERSION}.linux-${GO_ARCH}.tar.gz" \
-&& wget -nv "${GO_URL}" \
-&& echo "${GO_SHA256}  ${GO_VERSION}.linux-${GO_ARCH}.tar.gz" | sha256sum -c - \
-&& tar xf "${GO_VERSION}.linux-${GO_ARCH}.tar.gz" \
-&& mv go "/usr/local/${GO_VERSION}" \
-&& ln -s "/usr/local/${GO_VERSION}" /usr/local/go \
-&& rm -f "${GO_VERSION}.linux-${GO_ARCH}.tar.gz" \
-&& echo 'export PATH=$PATH:/usr/local/go/bin' | tee -a /etc/profile.d/go.sh > /dev/null
+    fi && \
+    GO_URL="https://go.dev/dl/${GO_VERSION}.linux-${GO_ARCH}.tar.gz" && \
+    wget -nv "${GO_URL}" && \
+    echo "${GO_SHA256}  ${GO_VERSION}.linux-${GO_ARCH}.tar.gz" | sha256sum -c - && \
+    tar xf "${GO_VERSION}.linux-${GO_ARCH}.tar.gz" && \
+    mv go "/usr/local/${GO_VERSION}" && \
+    ln -s "/usr/local/${GO_VERSION}" /usr/local/go && \
+    rm -f "${GO_VERSION}.linux-${GO_ARCH}.tar.gz" && \
+    echo 'export PATH=$PATH:/usr/local/go/bin' | tee -a /etc/profile.d/go.sh > /dev/null
 
 
 # --------------------------------------------------------------------

@@ -60,7 +60,7 @@ check_commands() {
 
 function print_changelog() {
 cat <<EOF
-apache-cloudberry-db-incubating (${GPDB_PKG_VERSION}) stable; urgency=low
+apache-cloudberry-db-incubating (${CBDB_PKG_VERSION}) stable; urgency=low
 
   * apache-cloudberry-db autobuild
 
@@ -89,15 +89,15 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
-export GPDB_FULL_VERSION=$VERSION
+export CBDB_FULL_VERSION=$VERSION
 
 # Set version if not provided
 if [ -z "${VERSION}" ]; then
-  export GPDB_FULL_VERSION=$(./getversion | cut -d'-' -f 1 | cut -d'+' -f 1)
+  export CBDB_FULL_VERSION=$(./getversion | cut -d'-' -f 1 | cut -d'+' -f 1)
 fi
 
-if [[ ! $GPDB_FULL_VERSION =~ ^[0-9] ]]; then
-    export GPDB_FULL_VERSION="0.$GPDB_FULL_VERSION"
+if [[ ! $CBDB_FULL_VERSION =~ ^[0-9] ]]; then
+    export CBDB_FULL_VERSION="0.$CBDB_FULL_VERSION"
 fi
 
 if [ -z ${BUILD_NUMBER+x} ]; then
@@ -108,7 +108,7 @@ if [ -z ${BUILD_USER+x} ]; then
   export BUILD_USER=github
 fi
 
-export GPDB_PKG_VERSION=${GPDB_FULL_VERSION}-${BUILD_NUMBER}-$(git --git-dir=.git rev-list HEAD --count).$(git --git-dir=.git rev-parse --short HEAD)
+export CBDB_PKG_VERSION=${CBDB_FULL_VERSION}-${BUILD_NUMBER}-$(git --git-dir=.git rev-list HEAD --count).$(git --git-dir=.git rev-parse --short HEAD)
 
 # Check if required commands are available
 check_commands
@@ -135,7 +135,7 @@ if [ "${DRY_RUN:-false}" = true ]; then
 fi
 
 # Run debbuild with the provided options
-echo "Building DEB with Version $GPDB_FULL_VERSION ..."
+echo "Building DEB with Version $CBDB_FULL_VERSION ..."
 
 print_changelog > debian/changelog
 
@@ -145,4 +145,4 @@ if ! eval "$DEBBUILD_CMD"; then
 fi
 
 # Print completion message
-echo "DEB build completed successfully with package $GPDB_PKG_VERSION"
+echo "DEB build completed successfully with package $CBDB_PKG_VERSION"

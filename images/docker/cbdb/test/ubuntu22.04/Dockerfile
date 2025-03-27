@@ -32,13 +32,13 @@
 # project has yet to be fully endorsed by the ASF.
 #
 # --------------------------------------------------------------------
-# Dockerfile for Cloudberry Database Base Environment
+# Dockerfile for Apache Cloudberry Base Environment
 # --------------------------------------------------------------------
 # This Dockerfile sets up a Ubuntu jammy 22.04 -based container to serve as
-# a base environment for evaluating the Cloudberry Database. It installs
+# a base environment for evaluating the Apache Cloudberry. It installs
 # necessary system utilities, configures the environment for SSH access,
-# and sets up a 'gpadmin' user with sudo privileges. The Cloudberry
-# Database DEB can be installed into this container for testing and
+# and sets up a 'gpadmin' user with sudo privileges. The Apache
+# Cloudberry DEB can be installed into this container for testing and
 # functional verification.
 #
 # Key Features:
@@ -92,9 +92,9 @@ RUN apt-get update -o Acquire::AllowInsecureRepositories=true && apt-get install
         sudo \
         which
 
-RUN apt-get install -y locales \
-&& locale-gen "en_US.UTF-8" \
-&& update-locale LC_ALL="en_US.UTF-8"
+RUN apt-get install -y locales && \
+    locale-gen "en_US.UTF-8" && \
+    update-locale LC_ALL="en_US.UTF-8"
 
 
 # --------------------------------------------------------------------

@@ -1,5 +1,5 @@
 Source: apache-cloudberry-db-incubating
-Maintainer: open-gpdb dev team https://github.com/open-gpdb/gpdb
+Maintainer: Apache Cloudberry (Incubating) https://cloudberry.apache.org
 Section: database
 Build-Depends: debhelper (>= 9),
     bison,
