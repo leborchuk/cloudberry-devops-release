@@ -83,7 +83,7 @@ RUN ln -snf /usr/share/zoneinfo/Europe/London /etc/localtime && echo $TIMEZONE_V
 RUN apt-get update -o Acquire::AllowInsecureRepositories=true && apt-get install -y --no-install-recommends --allow-unauthenticated \
         file \
         gdb \
-        glibc-locale-source \
+        glibc-source \
         make \
         openssh \
         openssh-clients \
