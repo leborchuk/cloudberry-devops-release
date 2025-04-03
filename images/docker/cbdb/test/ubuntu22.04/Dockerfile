@@ -88,7 +88,7 @@ RUN apt-get update -o Acquire::AllowInsecureRepositories=true && apt-get install
         openssh \
         openssh-client \
         openssh-server \
-        procps-ng \
+        procps \
         sudo \
         which
 
