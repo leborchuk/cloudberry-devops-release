@@ -86,7 +86,7 @@ RUN apt-get update -o Acquire::AllowInsecureRepositories=true && apt-get install
         glibc-source \
         make \
         openssh \
-        openssh-clients \
+        openssh-client \
         openssh-server \
         procps-ng \
         sudo \
