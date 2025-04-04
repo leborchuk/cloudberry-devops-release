@@ -60,29 +60,24 @@
 #   docker run -h cdw -it cloudberry-db-base-env
 # --------------------------------------------------------------------
 
-FROM ubuntu:jammy
-
-ARG accessKeyId
-ARG secretAccessKey
-ARG bucketName
+FROM ubuntu:22.04
 
 # Argument for configuring the timezone
 ARG TIMEZONE_VAR="Europe/London"
 
-
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBCONF_NOWARNINGS="yes"
 
 RUN stat -fc %T /sys/fs/cgroup/
 
-RUN ln -snf /usr/share/zoneinfo/Europe/London /etc/localtime && echo $TIMEZONE_VAR > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/${TIMEZONE_VAR} /etc/localtime && echo "${TIMEZONE_VAR}" > /etc/timezone
 
 # --------------------------------------------------------------------
 # Install Development Tools and Utilities
 # --------------------------------------------------------------------
-RUN apt-get update -o Acquire::AllowInsecureRepositories=true && apt-get install -y --no-install-recommends --allow-unauthenticated \
+RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
-  libssl-dev \
   gnupg \
   openssl \
   debhelper \
@@ -141,7 +136,16 @@ RUN apt-get update -o Acquire::AllowInsecureRepositories=true && apt-get install
   python3.10 \
   python3.10-dev \
   python3-distutils \
-  sudo
+  sudo \
+  liblz4-dev \
+  iputils-ping \
+  iproute2 \
+  rsync \
+  less \
+  openssh-client \
+  openssh-server \
+  lsof \
+  apt-utils
 
 RUN apt-get install -y locales && \
     locale-gen "en_US.UTF-8" && \
@@ -183,21 +187,23 @@ RUN cd && GO_VERSION="go1.23.4" && \
 # Copy Configuration Files and Setup the Environment
 # --------------------------------------------------------------------
 
-RUN ln -s /usr/bin/python2.7 /usr/bin/python
+RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
 COPY ./configs/* /tmp/
 
-RUN echo ${TIMEZONE_VAR} > /etc/timezone && \
-    chmod 777 /tmp/init_system.sh && \
+RUN chmod 777 /tmp/init_system.sh && \
     groupadd gpadmin && \
     useradd -rm -d /home/gpadmin -s /bin/bash -g root -G sudo -u 1001 gpadmin && \
     echo 'gpadmin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers && \
-    locale-gen "en_US.UTF-8" && \
-    update-locale LC_ALL="en_US.UTF-8"
+    mkdir -p /run/sshd && chmod 0755 /run/sshd
 
+RUN apt-get install -y libhyperic-sigar-java
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*
+
+ENV USER=gpadmin
 USER gpadmin
 WORKDIR /home/gpadmin
-
-RUN sudo DEBIAN_FRONTEND=noninteractive apt install -y libhyperic-sigar-java libaprutil1-dev libuv1-dev
 
 CMD ["bash","-c","/tmp/init_system.sh"]
