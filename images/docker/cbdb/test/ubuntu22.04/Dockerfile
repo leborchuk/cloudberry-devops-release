@@ -84,7 +84,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         openssh-client \
         openssh-server \
         procps \
-        sudo
+        sudo \
+        net-tools \
+        python-pip \
+        python-six
 
 RUN apt-get install -y locales && \
     locale-gen "en_US.UTF-8" && \
