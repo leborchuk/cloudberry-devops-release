@@ -91,6 +91,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   cmake \
   curl \
+  htop \
   cgroup-tools \
   flex \
   gcc-11 \
@@ -98,6 +99,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   g++-11-multilib \
   git \
   krb5-multidev \
+  libprotobuf-dev \
+  protobuf-compiler \
   libapr1-dev \
   libbz2-dev \
   libcurl4-gnutls-dev \
@@ -121,8 +124,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libldap-2.5-0 \
   libssl3 \
   ninja-build \
-  python-setuptools \
-  python3-setuptools \
   quilt \
   unzip \
   wget \
@@ -136,6 +137,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   python3.10 \
   python3.10-dev \
   python3-distutils \
+  python3-pip \
+  python3-setuptools \
   sudo \
   liblz4-dev \
   iputils-ping \
@@ -148,8 +151,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   apt-utils \
   silversearcher-ag \
   net-tools \
-  python-pip \
-  python-six
+  python-six \
+  tzdata \
+  vim
 
 RUN apt-get install -y locales && \
     locale-gen "en_US.UTF-8" && \
@@ -195,9 +199,10 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
 COPY ./configs/* /tmp/
 
-RUN chmod 777 /tmp/init_system.sh && \
+RUN cp /tmp/90-cbdb-limits /etc/security/limits.d/90-cbdb-limits && \
+    chmod 755 /tmp/init_system.sh && \
     groupadd gpadmin && \
-    useradd -rm -d /home/gpadmin -s /bin/bash -g root -G sudo -u 1001 gpadmin && \
+    useradd -rm -d /home/gpadmin -s /bin/bash -g gpadmin -G sudo -G root -u 1001 gpadmin && \
     echo 'gpadmin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers && \
     mkdir -p /run/sshd && chmod 0755 /run/sshd
 
@@ -205,6 +210,12 @@ RUN apt-get install -y libhyperic-sigar-java
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*
+
+# Install testinfra via pip
+RUN pip3 install pytest-testinfra
+ 
+# Example: Copying test files into the container
+COPY tests /tests
 
 ENV USER=gpadmin
 USER gpadmin

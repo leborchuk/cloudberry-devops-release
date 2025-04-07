@@ -101,7 +101,8 @@ RUN ln -s /usr/bin/python2.7 /usr/bin/python
 
 COPY ./configs/* /tmp/
 
-RUN echo ${TIMEZONE_VAR} > /etc/timezone && \
+RUN cp /tmp/90-cbdb-limits /etc/security/limits.d/90-cbdb-limits && \
+    echo ${TIMEZONE_VAR} > /etc/timezone && \
     chmod 777 /tmp/init_system.sh && \
     groupadd gpadmin && \
     useradd -rm -d /home/gpadmin -s /bin/bash -g root -G sudo -u 1001 gpadmin && \
