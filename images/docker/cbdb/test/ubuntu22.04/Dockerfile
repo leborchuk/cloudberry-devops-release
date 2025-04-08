@@ -86,7 +86,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         procps \
         sudo \
         net-tools \
-        python-pip \
+        python3.10 \
+        python3.10-dev \
+        python3-distutils \
+        python3-pip \
         python-six
 
 RUN apt-get install -y locales && \
@@ -97,15 +100,15 @@ RUN apt-get install -y locales && \
 # Copy Configuration Files and Setup the Environment
 # --------------------------------------------------------------------
 
-RUN ln -s /usr/bin/python2.7 /usr/bin/python
+RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
 COPY ./configs/* /tmp/
 
 RUN cp /tmp/90-cbdb-limits /etc/security/limits.d/90-cbdb-limits && \
     echo ${TIMEZONE_VAR} > /etc/timezone && \
-    chmod 777 /tmp/init_system.sh && \
+    chmod 755 /tmp/init_system.sh && \
     groupadd gpadmin && \
-    useradd -rm -d /home/gpadmin -s /bin/bash -g root -G sudo -u 1001 gpadmin && \
+    useradd -rm -d /home/gpadmin -s /bin/bash -g gpadmin -G root -G sudo -u 1001 gpadmin && \
     echo 'gpadmin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers && \
     mkdir -p /run/sshd && chmod 0755 /run/sshd
 
