@@ -57,6 +57,9 @@ fi
 # SSH. This is useful for development and debugging purposes. If the SSH
 # daemon fails to start, the script exits with an error.
 # --------------------------------------------------------------------
+sudo mkdir -p /run/sshd
+sudo chmod 755 /run/sshd
+
 if ! sudo /usr/sbin/sshd; then
     echo "Failed to start SSH daemon" >&2
     exit 1

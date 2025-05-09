@@ -37,8 +37,8 @@
 # This Dockerfile sets up a Ubuntu jammy 22.04 -based container to serve as
 # a base environment for evaluating the Apache Cloudberry. It installs
 # necessary system utilities, configures the environment for SSH access,
-# and sets up a 'gpadmin' user with sudo privileges. The Apache
-# Cloudberry DEB can be installed into this container for testing and
+# and sets up a 'gpadmin' user with sudo privileges. The Apache Cloudberry
+# DEB can be installed into this container for testing and
 # functional verification.
 #
 # Key Features:
@@ -65,56 +65,74 @@ FROM ubuntu:22.04
 # Argument for configuring the timezone
 ARG TIMEZONE_VAR="Europe/London"
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# Environment variables for locale and user
+ENV container=docker
+ENV LANG=en_US.UTF-8
+ENV USER=gpadmin
+ENV TZ=${TIMEZONE_VAR}
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DEBCONF_NOWARNINGS="yes"
-
-RUN stat -fc %T /sys/fs/cgroup/
-
-RUN ln -snf /usr/share/zoneinfo/${TIMEZONE_VAR} /etc/localtime && echo "${TIMEZONE_VAR}" > /etc/timezone
 
 # --------------------------------------------------------------------
 # Install Development Tools and Utilities
 # --------------------------------------------------------------------
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        file \
-        gdb \
-        glibc-source \
-        make \
-        openssh-client \
-        openssh-server \
-        procps \
-        sudo \
-        net-tools \
-        python3.10 \
-        python3.10-dev \
-        python3-distutils \
-        python3-pip \
-        python-six
 
-RUN apt-get install -y locales && \
-    locale-gen "en_US.UTF-8" && \
-    update-locale LC_ALL="en_US.UTF-8"
+RUN apt-get update && \
+    apt-get install -y -qq \
+            htop \
+            bat \
+            silversearcher-ag \
+            vim \
+            wget \
+            git \
+            iproute2 \
+            iputils-ping \
+            lsof \
+            openssh-server \
+            pkg-config \
+            python3.10 \
+            python3-distutils \
+            python3-pip \
+            python3-setuptools \
+            rsync \
+            sudo \
+            tzdata && \
+    apt-get install -y -qq locales && \
+    locale-gen ${LANG} && \
+    update-locale LANG=${LANG} && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3.10 /usr/bin/python
+
+# --------------------------------------------------------------------
+# User Creation and Configuration
+# --------------------------------------------------------------------
+# - Create the 'gpadmin' user and group.
+# - Configure the 'gpadmin' user with passwordless sudo privileges.
+# - Add Cloudberry-specific entries to the gpadmin's .bashrc.
+# --------------------------------------------------------------------
+RUN /usr/sbin/groupadd gpadmin && \
+    /usr/sbin/useradd -m -g gpadmin gpadmin && \
+    echo 'gpadmin ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/90-gpadmin && \
+    chmod 0440 /etc/sudoers.d/90-gpadmin && \
+    echo '\n# Add Cloudberry entries\nif [ -f /usr/local/cloudberry/greenplum_path.sh ]; then\n  source /usr/local/cloudberry/greenplum_path.sh\n  export COORDINATOR_DATA_DIRECTORY=/data1/coordinator/gpseg-1\nfi' >> /home/gpadmin/.bashrc
 
 # --------------------------------------------------------------------
 # Copy Configuration Files and Setup the Environment
 # --------------------------------------------------------------------
-
-RUN ln -s /usr/bin/python3.10 /usr/bin/python
-
+# - Copy custom configuration files from the build context to /tmp/.
+# - Apply custom system limits and timezone.
+# - Set up SSH for password-based authentication.
+# - Generate locale and set the default locale to en_US.UTF-8.
+# --------------------------------------------------------------------
 COPY ./configs/* /tmp/
 
 RUN cp /tmp/90-cbdb-limits /etc/security/limits.d/90-cbdb-limits && \
-    echo ${TIMEZONE_VAR} > /etc/timezone && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
     chmod 755 /tmp/init_system.sh && \
-    groupadd gpadmin && \
-    useradd -rm -d /home/gpadmin -s /bin/bash -g gpadmin -G root -G sudo -u 1001 gpadmin && \
-    echo 'gpadmin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers && \
-    mkdir -p /run/sshd && chmod 0755 /run/sshd
+    ssh-keygen -A
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*
-
-ENV USER=gpadmin
 USER gpadmin
 WORKDIR /home/gpadmin
 
