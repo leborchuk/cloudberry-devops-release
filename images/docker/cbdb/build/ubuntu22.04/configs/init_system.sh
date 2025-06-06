@@ -183,6 +183,9 @@ Memory .............. : $(free -h | grep Mem: | awk '{print $2}') total
 
 EOF
 
+# Add go to PATH
+source /etc/profile.d/go.sh
+
 # --------------------------------------------------------------------
 # Start an interactive bash shell
 # --------------------------------------------------------------------
