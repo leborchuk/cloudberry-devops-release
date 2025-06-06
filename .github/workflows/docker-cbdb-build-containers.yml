@@ -172,8 +172,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           # Tag with both latest and version-specific tags
           tags: |
-            apache/incubator-cloudberry:cbdb-build-${{ matrix.platform }}-latest
-            apache/incubator-cloudberry:cbdb-build-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}
+            ghcr.io/leborchuk:cbdb-build-${{ matrix.platform }}-latest
+            ghcr.io/leborchuk:cbdb-build-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}
           # Add standard Open Container Initiative (OCI) labels
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
