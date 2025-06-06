@@ -65,112 +65,74 @@ FROM ubuntu:22.04
 # Argument for configuring the timezone
 ARG TIMEZONE_VAR="Europe/London"
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# Environment variables for locale and user
+ENV container=docker
+ENV LANG=en_US.UTF-8
+ENV USER=gpadmin
+ENV TZ=${TIMEZONE_VAR}
 ENV DEBIAN_FRONTEND=noninteractive
-ENV DEBCONF_NOWARNINGS="yes"
-
-RUN stat -fc %T /sys/fs/cgroup/
-
-RUN ln -snf /usr/share/zoneinfo/${TIMEZONE_VAR} /etc/localtime && echo "${TIMEZONE_VAR}" > /etc/timezone
 
 # --------------------------------------------------------------------
 # Install Development Tools and Utilities
 # --------------------------------------------------------------------
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  build-essential \
-  gnupg \
-  openssl \
-  debhelper \
-  libfakeroot \
-  debootstrap \
-  devscripts \
-  make \
-  equivs \
-  bison \
-  ca-certificates-java \
-  ca-certificates \
-  cmake \
-  curl \
-  htop \
-  cgroup-tools \
-  flex \
-  gcc-11 \
-  g++-11 \
-  g++-11-multilib \
-  git \
-  krb5-multidev \
-  libprotobuf-dev \
-  protobuf-compiler \
-  libapr1-dev \
-  libbz2-dev \
-  libcurl4-gnutls-dev \
-  libpstreams-dev \
-  libxerces-c-dev \
-  libsystemd-dev \
-  libevent-dev \
-  libkrb5-dev \
-  libldap2-dev \
-  libperl-dev \
-  libreadline-dev \
-  libssl-dev \
-  libxml2-dev \
-  libyaml-dev \
-  libzstd-dev \
-  libaprutil1-dev \
-  libpam0g-dev \
-  libpam0g \
-  libcgroup1 \
-  libyaml-0-2 \
-  libldap-2.5-0 \
-  libssl3 \
-  ninja-build \
-  quilt \
-  unzip \
-  wget \
-  zlib1g-dev \
-  libuv1-dev \
-  libgpgme-dev \
-  libgpgme11 \
-  python2.7 \
-  python2.7-dev \
-  pkg-config \
-  python3.10 \
-  python3.10-dev \
-  python3-distutils \
-  python3-pip \
-  python3-setuptools \
-  sudo \
-  liblz4-dev \
-  iputils-ping \
-  iproute2 \
-  rsync \
-  less \
-  openssh-client \
-  openssh-server \
-  lsof \
-  apt-utils \
-  silversearcher-ag \
-  net-tools \
-  python-six \
-  tzdata \
-  vim
 
-RUN apt-get install -y locales && \
+RUN sed -i "s/archive.ubuntu.com/mirror.yandex.ru/g" /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y -qq \
+            htop \
+            bat \
+            silversearcher-ag \
+            vim \
+            wget && \
+    apt-get install -y -qq locales && \
     locale-gen "en_US.UTF-8" && \
-    update-locale LC_ALL="en_US.UTF-8"
-
-RUN cd && \
-    XERCES_LATEST_RELEASE=3.3.0 && \
-    wget -nv "https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-${XERCES_LATEST_RELEASE}.tar.gz" && \
-    echo "$(curl -sL https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-${XERCES_LATEST_RELEASE}.tar.gz.sha256)" | sha256sum -c - && \
-    tar xf "xerces-c-${XERCES_LATEST_RELEASE}.tar.gz"; rm "xerces-c-${XERCES_LATEST_RELEASE}.tar.gz" && \
-    cd xerces-c-${XERCES_LATEST_RELEASE} && \
-    ./configure --prefix=/usr/local/xerces-c && \
-    make -j$(nproc) && \
-    make install -C ~/xerces-c-${XERCES_LATEST_RELEASE} && \
-    rm -rf ~/xerces-c*
-
-RUN cd && GO_VERSION="go1.23.4" && \
+    update-locale LANG="en_US.UTF-8" && \
+    apt-get install -y -qq \
+            bison \
+            build-essential \
+            cmake \
+            dpkg-dev \
+            fakeroot \
+            flex \
+            g++-11 \
+            gcc-11 \
+            git \
+            iproute2 \
+            iputils-ping \
+            libapr1-dev \
+            libbz2-dev \
+            libcurl4-gnutls-dev \
+            libevent-dev \
+            libipc-run-perl \
+            libkrb5-dev \
+            libldap-dev \
+            liblz4-dev \
+            libpam0g-dev \
+            libperl-dev \
+            libprotobuf-dev \
+            libreadline-dev \
+            libssl-dev \
+            libuv1-dev \
+            libxerces-c-dev \
+            libxml2-dev \
+            libyaml-dev \
+            libzstd-dev \
+            lsof \
+            make \
+            openssh-server \
+            pkg-config \
+            protobuf-compiler \
+            python3-distutils \
+            python3-pip \
+            python3-setuptools \
+            python3.10 \
+            python3.10-dev \
+            rsync \
+            sudo \
+            tzdata \
+            zlib1g-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    cd && GO_VERSION="go1.23.4" && \
     ARCH=$(uname -m) && \
     if [ "${ARCH}" = "aarch64" ]; then \
         GO_ARCH="arm64" && \
@@ -190,34 +152,35 @@ RUN cd && GO_VERSION="go1.23.4" && \
     rm -f "${GO_VERSION}.linux-${GO_ARCH}.tar.gz" && \
     echo 'export PATH=$PATH:/usr/local/go/bin' | tee -a /etc/profile.d/go.sh > /dev/null
 
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100 && \
+    update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-11 100 && \
+    update-alternatives --set gcc /usr/bin/gcc-11 && \
+    update-alternatives --set g++ /usr/bin/g++-11
 
 # --------------------------------------------------------------------
 # Copy Configuration Files and Setup the Environment
 # --------------------------------------------------------------------
 
-RUN ln -s /usr/bin/python3.10 /usr/bin/python
-
 COPY ./configs/* /tmp/
 
 RUN cp /tmp/90-cbdb-limits /etc/security/limits.d/90-cbdb-limits && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
     chmod 755 /tmp/init_system.sh && \
-    groupadd gpadmin && \
-    useradd -rm -d /home/gpadmin -s /bin/bash -g gpadmin -G sudo -G root -u 1001 gpadmin && \
-    echo 'gpadmin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers && \
-    mkdir -p /run/sshd && chmod 0755 /run/sshd
-
-RUN apt-get install -y libhyperic-sigar-java
-
-# Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*
+    /usr/sbin/groupadd gpadmin && \
+    /usr/sbin/useradd -m -g gpadmin gpadmin && \
+    echo 'gpadmin ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/90-gpadmin && \
+    chmod 0440 /etc/sudoers.d/90-gpadmin && \
+    ssh-keygen -A && \
+    mkdir /var/run/sshd && chmod 0755 /var/run/sshd
 
 # Install testinfra via pip
 RUN pip3 install pytest-testinfra
- 
+
 # Example: Copying test files into the container
 COPY tests /tests
 
-ENV USER=gpadmin
 USER gpadmin
 WORKDIR /home/gpadmin
 
