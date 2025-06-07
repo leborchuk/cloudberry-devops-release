@@ -1,3 +1,4 @@
+
 # --------------------------------------------------------------------
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -115,7 +116,7 @@ RUN /usr/sbin/groupadd gpadmin && \
     /usr/sbin/useradd -m -g gpadmin gpadmin && \
     echo 'gpadmin ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/90-gpadmin && \
     chmod 0440 /etc/sudoers.d/90-gpadmin && \
-    echo '\n# Add Cloudberry entries\nif [ -f /usr/local/cloudberry/greenplum_path.sh ]; then\n  source /usr/local/cloudberry/greenplum_path.sh\n  export COORDINATOR_DATA_DIRECTORY=/data1/coordinator/gpseg-1\nfi' >> /home/gpadmin/.bashrc
+    echo '\n# Add Cloudberry entries\nif [ -f /usr/local/cloudberry/cloudberry-env.sh ]; then\n  source /usr/local/cloudberry/cloudberry-env.sh\n  export COORDINATOR_DATA_DIRECTORY=/data1/coordinator/gpseg-1\nfi' >> /home/gpadmin/.bashrc
 
 # --------------------------------------------------------------------
 # Copy Configuration Files and Setup the Environment
@@ -137,3 +138,4 @@ USER gpadmin
 WORKDIR /home/gpadmin
 
 CMD ["bash","-c","/tmp/init_system.sh"]
+

@@ -23,7 +23,7 @@
 # Description: Configures Apache Cloudberry build environment and runs
 #             ./configure with optimized settings. Performs the
 #             following:
-#             1. Prepares ${BUILD_DESTINATION} directory
+#             1. Prepares /usr/local/cloudberry-db directory
 #             2. Sets up library dependencies
 #             3. Configures build with required features enabled
 #
@@ -101,13 +101,12 @@ export LOG_DIR="${SRC_DIR}/build-logs"
 CONFIGURE_LOG="${LOG_DIR}/configure.log"
 
 # Initialize environment
-init_environment "Cloudberry Configure Script" "${CONFIGURE_LOG}" "${BUILD_DESTINATION}"
+init_environment "Cloudberry Configure Script" "${CONFIGURE_LOG}"
 
 # Initial setup
 log_section "Initial Setup"
-execute_cmd sudo rm -rf ${BUILD_DESTINATION}/* || exit 2
+execute_cmd sudo rm -rf /usr/local/cloudberry-db || exit 2
 execute_cmd sudo chmod a+w /usr/local || exit 2
-
 execute_cmd sudo mkdir -p ${BUILD_DESTINATION}/lib || exit 2
 if [[ "$OS_ID" == "rocky" && "$OS_VERSION" =~ ^(8|9) ]]; then
     execute_cmd sudo cp /usr/local/xerces-c/lib/libxerces-c.so \
@@ -120,7 +119,7 @@ log_section_end "Initial Setup"
 
 # Set environment
 log_section "Environment Setup"
-export LD_LIBRARY_PATH=${BUILD_DESTINATION}/lib:LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/cloudberry-db/lib:LD_LIBRARY_PATH
 log_section_end "Environment Setup"
 
 # Add debug options if ENABLE_DEBUG is set to "true"
@@ -134,7 +133,7 @@ fi
 
 # Configure build
 log_section "Configure"
-execute_cmd ./configure --prefix=${BUILD_DESTINATION} \
+execute_cmd ./configure --prefix=/usr/local/cloudberry-db \
             --disable-external-fts \
             --enable-gpcloud \
             --enable-ic-proxy \
@@ -159,7 +158,7 @@ execute_cmd ./configure --prefix=${BUILD_DESTINATION} \
             --with-openssl \
             --with-uuid=e2fs \
             --with-includes=/usr/local/xerces-c/include \
-            --with-libraries=${BUILD_DESTINATION}/lib || exit 4
+            --with-libraries=/usr/local/cloudberry-db/lib || exit 4
 log_section_end "Configure"
 
 # Capture version information

@@ -64,7 +64,7 @@ apache-cloudberry-db-incubating (${CBDB_PKG_VERSION}) stable; urgency=low
 
   * apache-cloudberry-db autobuild
 
-  -- ${BUILD_USER} <${BUILD_USER}@$(hostname)>  $(date +'%a, %d %b %Y %H:%M:%S %z')
+ -- ${BUILD_USER} <${BUILD_USER}@$(hostname)>  $(date +'%a, %d %b %Y %H:%M:%S %z')
 EOF
 }
 

@@ -1,5 +1,5 @@
 Source: apache-cloudberry-db-incubating
-Maintainer: Apache Cloudberry (Incubating) https://cloudberry.apache.org
+Maintainer: Apache Cloudberry (Incubating) <dev@cloudberry.apache.org> 
 Section: database
 Build-Depends: debhelper (>= 9),
     bison,
