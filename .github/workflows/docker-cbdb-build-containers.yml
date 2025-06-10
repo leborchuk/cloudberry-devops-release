@@ -60,6 +60,7 @@ on:
     paths:
       - 'images/docker/cbdb/build/rocky8/**'
       - 'images/docker/cbdb/build/rocky9/**'
+      - 'images/docker/cbdb/build/ubuntu22.04/**'
   workflow_dispatch:  # Manual trigger
 
 # Prevent multiple workflow runs from interfering with each other
@@ -76,7 +77,7 @@ jobs:
     # Matrix strategy to build for both Rocky Linux 8 and 9
     strategy:
       matrix:
-        platform: ['rocky8', 'rocky9']
+        platform: ['rocky8', 'rocky9', 'ubuntu22.04']
 
     steps:
       # Checkout repository code with full history
@@ -103,6 +104,8 @@ jobs:
               - 'images/docker/cbdb/build/rocky8/**'
             rocky9:
               - 'images/docker/cbdb/build/rocky9/**'
+            ubuntu22.04:
+              - 'images/docker/cbdb/build/ubuntu22.04/**'
 
       # Set up QEMU for multi-architecture support
       # This allows building ARM64 images on AMD64 infrastructure and vice versa
@@ -110,14 +113,13 @@ jobs:
         if: ${{ steps.platform-filter.outputs[matrix.platform] == 'true' }}
         uses: docker/setup-qemu-action@v3
 
-      # Login to DockerHub for pushing images
-      # Requires DOCKERHUB_USER and DOCKERHUB_TOKEN secrets to be set
-      - name: Login to Docker Hub
-        if: ${{ steps.platform-filter.outputs[matrix.platform] == 'true' }}
+      # Login to  GitHub Container Registry for pushing images
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # Setup Docker Buildx for efficient builds
       # Enable debug mode for better troubleshooting
@@ -170,8 +172,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           # Tag with both latest and version-specific tags
           tags: |
-            apache/incubator-cloudberry:cbdb-build-${{ matrix.platform }}-latest
-            apache/incubator-cloudberry:cbdb-build-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}
+            ghcr.io/leborchuk:cbdb-build-${{ matrix.platform }}-latest
+            ghcr.io/leborchuk:cbdb-build-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}
           # Add standard Open Container Initiative (OCI) labels
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}

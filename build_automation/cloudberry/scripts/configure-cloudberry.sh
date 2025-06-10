@@ -91,6 +91,11 @@ set -euo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${SCRIPT_DIR}/cloudberry-utils.sh"
 
+# Call it before conditional logic
+detect_os
+
+echo "Detected OS: $OS_ID $OS_VERSION"
+
 # Define log directory and files
 export LOG_DIR="${SRC_DIR}/build-logs"
 CONFIGURE_LOG="${LOG_DIR}/configure.log"
@@ -102,11 +107,15 @@ init_environment "Cloudberry Configure Script" "${CONFIGURE_LOG}" "${BUILD_DESTI
 log_section "Initial Setup"
 execute_cmd sudo rm -rf ${BUILD_DESTINATION}/* || exit 2
 execute_cmd sudo chmod a+w /usr/local || exit 2
+
 execute_cmd sudo mkdir -p ${BUILD_DESTINATION}/lib || exit 2
-execute_cmd sudo cp /usr/local/xerces-c/lib/libxerces-c.so \
-        /usr/local/xerces-c/lib/libxerces-c-3.3.so \
-        ${BUILD_DESTINATION}/lib || exit 3
+if [[ "$OS_ID" == "rocky" && "$OS_VERSION" =~ ^(8|9) ]]; then
+    execute_cmd sudo cp /usr/local/xerces-c/lib/libxerces-c.so \
+                /usr/local/xerces-c/lib/libxerces-c-3.3.so \
+                /usr/local/cloudberry-db/lib || exit 3
+fi
 execute_cmd sudo chown -R gpadmin:gpadmin ${BUILD_DESTINATION} || exit 2
+
 log_section_end "Initial Setup"
 
 # Set environment
@@ -119,7 +128,6 @@ CONFIGURE_DEBUG_OPTS=""
 
 if [ "${ENABLE_DEBUG:-false}" = "true" ]; then
     CONFIGURE_DEBUG_OPTS="--enable-debug \
-                          --enable-profiling \
                           --enable-cassert \
                           --enable-debug-extensions"
 fi
@@ -133,6 +141,7 @@ execute_cmd ./configure --prefix=${BUILD_DESTINATION} \
             --enable-mapreduce \
             --enable-orafce \
             --enable-orca \
+	    --enable-pax \
             --enable-pxf \
             --enable-tap-tests \
             ${CONFIGURE_DEBUG_OPTS} \
