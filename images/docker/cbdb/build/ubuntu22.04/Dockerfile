@@ -131,6 +131,16 @@ RUN sed -i "s/archive.ubuntu.com/mirror.yandex.ru/g" /etc/apt/sources.list && \
             sudo \
             tzdata \
             zlib1g-dev && \
+    apt-get install -y -qq \
+            ca-certificates-java \
+            cgroup-tools \
+            curl \
+            debhelper \
+            libaprutil1-dev \
+            libcgroup1 \
+            ninja-build \
+            quilt \
+            unzip && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     cd && GO_VERSION="go1.23.4" && \
     ARCH=$(uname -m) && \

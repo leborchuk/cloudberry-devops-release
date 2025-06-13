@@ -147,8 +147,8 @@ jobs:
             type=gha,scope=docker-cbdb-test-${{ matrix.platform }}
           # Tag with both latest and version-specific tags
           tags: |
-            apache/incubator-cloudberry:cbdb-test-${{ matrix.platform }}-latest
-            apache/incubator-cloudberry:cbdb-test-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}
+            ghcr.io/${{ github.repository }}:cbdb-test-${{ matrix.platform }}-latest
+            ghcr.io/${{ github.repository }}:cbdb-test-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}
           # Add metadata labels for better image tracking
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
@@ -171,15 +171,15 @@ jobs:
           echo "- **Build Date**: ${{ steps.version.outputs.BUILD_DATE }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### 🐳 Docker Images" >> $GITHUB_STEP_SUMMARY
-          echo "- Latest tag: \`apache/incubator-cloudberry:cbdb-test-${{ matrix.platform }}-latest\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Version tag: \`apache/incubator-cloudberry:cbdb-test-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Latest tag: \`ghcr.io/${{ github.repository }}:cbdb-test-${{ matrix.platform }}-latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Version tag: \`ghcr.io/${{ github.repository }}:cbdb-test-${{ matrix.platform }}-${{ steps.version.outputs.BUILD_DATE }}-${{ steps.version.outputs.SHA_SHORT }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### 📋 Quick Reference" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
           echo "# Pull the image (automatically selects correct architecture)" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull apache/incubator-cloudberry:cbdb-test-${{ matrix.platform }}-latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/${{ github.repository }}:cbdb-test-${{ matrix.platform }}-latest" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "# Pull specific architecture if needed" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull --platform linux/amd64 apache/incubator-cloudberry:cbdb-test-${{ matrix.platform }}-latest" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull --platform linux/arm64 apache/incubator-cloudberry:cbdb-test-${{ matrix.platform }}-latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull --platform linux/amd64 ghcr.io/${{ github.repository }}:cbdb-test-${{ matrix.platform }}-latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull --platform linux/arm64 ghcr.io/${{ github.repository }}:cbdb-test-${{ matrix.platform }}-latest" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
