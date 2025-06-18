@@ -76,8 +76,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Development Tools and Utilities
 # --------------------------------------------------------------------
 
-RUN sed -i "s/archive.ubuntu.com/mirror.yandex.ru/g" /etc/apt/sources.list && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y -qq \
             htop \
             bat \
